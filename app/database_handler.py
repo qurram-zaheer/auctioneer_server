@@ -14,7 +14,11 @@ class DatabaseHandler:
 
     def get_all_records(self, collection_name):
         cursor = self.db[collection_name].find()
-        return list(cursor)
+        cleaned_list = []
+        for item in list(cursor):
+            item["_id"] = str(item["_id"])
+            cleaned_list.append(item)
+        return cleaned_list
 
     def get_single_record(self, condition, collection_name):
         cursor = self.db[collection_name].find_one(condition)
@@ -25,8 +29,14 @@ class DatabaseHandler:
         return list(cursor)
 
     def add_record(self, record, collection_name):
-        added_id = self.db[collection_name].insert_one(record)
-        return added_id
+        added_id = self.db[collection_name].insert_one(record).inserted_id
+        return str(added_id)
 
     def close(self):
         self.client.close()
+
+    def push(self, item, field, collection_name, condition):
+        return self.db[collection_name].update_one(condition, {"$push": {field: item}}).acknowledged
+
+    def set(self, item, field, collection_name, condition):
+        return self.db[collection_name].update_one(condition, {"$set": {field: item}}).acknowledged

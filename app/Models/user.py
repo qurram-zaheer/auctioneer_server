@@ -18,8 +18,9 @@ class User:
         db_handler = DatabaseHandler()
         if self.verify_existence(self.email, db_handler):
             raise EmailAlreadyExistsException()
-        db_handler.add_record(user_dict, "users")
+        uid = db_handler.add_record(user_dict, "users")
         db_handler.close()
+        return uid
 
     @staticmethod
     def get_user(email):
